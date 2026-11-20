@@ -103,6 +103,3 @@ streamlit run app.py
 
 Market prices, percentage changes, sentiment tags, news items, and live broadcast feeds are provided for informational purposes only and do not constitute financial or investment advice.
 
-```
-
-```
