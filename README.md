@@ -1,6 +1,3 @@
-Here is the updated `README.md` combining your live link (`[https://global-financial-terminal.streamlit.app/](https://global-financial-terminal.streamlit.app/)`) and the style/structure of your example, tailored accurately to your modular app (`3_2.py` / `financial_terminal`):
-
-```markdown
 # 🌐 [Global Financial Terminal: AI Stock Analyzer (Ultra Speed Edition)](https://global-financial-terminal.streamlit.app/)
 
 A high-performance, real-time financial tracking dashboard built with **Python**, **Streamlit**, **yfinance**, **Plotly**, and **Requests**. Designed like an institutional terminal, this app features batched bulk market data fetching, market session awareness, fundamental deep dives, news feeds, and embedded live broadcast hubs across major global indices[cite: 2].
