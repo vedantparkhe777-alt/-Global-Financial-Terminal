@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import urllib.parse
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -16,12 +17,24 @@ def get_market_status(market_key: str):
     except Exception:
         now_local = datetime.now(timezone(timedelta(hours=cfg["utc_offset"])))
 
-    is_weekday = now_local.weekday() < 5
+    weekday = now_local.weekday()  # Mon=0 ... Sun=6
     current_hm = (now_local.hour, now_local.minute)
-    in_session = any(start <= current_hm <= end for start, end in cfg["sessions"])
-    is_open = is_weekday and in_session
-    local_time_str = now_local.strftime("%a %H:%M")
 
+    if cfg.get("is_24x5"):
+        if weekday == 5:  # Saturday
+            is_open = False
+        elif weekday == 6:  # Sunday opens at 18:00 ET
+            is_open = current_hm >= (18, 0)
+        elif weekday == 4:  # Friday closes at 17:00 ET
+            is_open = current_hm < (17, 0)
+        else:  # Mon–Thu daily break 17:00–18:00 ET
+            is_open = not ((17, 0) <= current_hm < (18, 0))
+    else:
+        is_weekday = weekday < 5
+        in_session = any(start <= current_hm <= end for start, end in cfg["sessions"])
+        is_open = is_weekday and in_session
+
+    local_time_str = now_local.strftime("%a %H:%M")
     return is_open, local_time_str, cfg["hours_label"]
 
 
@@ -29,7 +42,21 @@ def find_market_key_for_symbol(ticker_symbol: str) -> str:
     for key, cfg in MARKETS.items():
         if ticker_symbol in cfg["symbols"] or ticker_symbol == cfg["index_ticker"]:
             return key
+    if ticker_symbol.endswith("=F"):
+        return "Commodities"
     return "Nasdaq"
+
+
+def resolve_full_symbol(symbol: str) -> str:
+    decoded = urllib.parse.unquote(symbol)
+    all_symbols = [s for cfg in MARKETS.values() for s in cfg["symbols"]]
+    if decoded in all_symbols:
+        return decoded
+    exact_matches = [s for s in all_symbols if s.split(".")[0] == decoded]
+    if exact_matches:
+        return exact_matches[0]
+    prefix_matches = [s for s in all_symbols if s.startswith(decoded)]
+    return prefix_matches[0] if prefix_matches else decoded
 
 
 def classify_sentiment(p_change: float) -> str:
@@ -55,11 +82,21 @@ def _extract_ticker_slice(data: pd.DataFrame, symbol: str, multi: bool) -> pd.Da
     return data
 
 
-@st.cache_data(ttl=15)
+@st.cache_data(ttl=30)
 def get_market_and_index_bulk(symbols: tuple[str, ...], index_symbol: str, index_name: str):
-    """Fetch index + all constituent stocks in ONE single yf.download() request."""
+    """Fetch index + all constituent tickers in ONE threaded yf.download() request."""
     all_tickers = [index_symbol] + list(symbols)
-    data = yf.download(all_tickers, period="2d", interval="1d", group_by="ticker", progress=False)
+    data = yf.download(
+        all_tickers,
+        period="5d",
+        interval="1d",
+        group_by="ticker",
+        threads=True,
+        auto_adjust=False,
+        actions=False,
+        progress=False,
+        timeout=5,
+    )
     is_multi = len(all_tickers) > 1
 
     index_summary = None
@@ -115,26 +152,29 @@ def get_market_and_index_bulk(symbols: tuple[str, ...], index_symbol: str, index
                 continue
 
             p_change = ((curr_price - prev_close) / prev_close) * 100
+            encoded_sym = urllib.parse.quote(symbol, safe="")
 
             records.append({
-                "Ticker": f"/?symbol={clean_symbol}#{clean_symbol}",
+                "_symbol": symbol,
+                "Ticker": f"/?symbol={encoded_sym}#{clean_symbol}",
                 "Stock Name": stock_display_name,
                 "Price": curr_price,
                 "% Change": p_change,
                 "Volume": volume,
                 "Market Sentiment": classify_sentiment(p_change),
+                "AI Agent": "⭐",
             })
         except Exception:
             pass
 
     df = pd.DataFrame(records)
     if not df.empty:
-        df = df.sort_values(by="Volume", ascending=False)
+        df = df.sort_values(by="Volume", ascending=False).reset_index(drop=True)
 
     return index_summary, df
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=120)
 def get_ticker_info_cached(ticker_symbol: str) -> dict:
     try:
         return yf.Ticker(ticker_symbol).info or {}

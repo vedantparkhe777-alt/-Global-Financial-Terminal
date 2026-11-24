@@ -1,10 +1,10 @@
 import urllib.parse
 import xml.etree.ElementTree as ET
 
-import requests
 import streamlit as st
 
 from config.markets import MARKETS
+from services.live_tv import get_http_session
 
 try:
     from bs4 import BeautifulSoup
@@ -34,6 +34,9 @@ def to_google_finance_ticker(yf_symbol: str) -> str:
         if yf_symbol == cfg["index_ticker"]:
             return cfg["gf_index_ticker"]
 
+    if yf_symbol.endswith("=F"):
+        return yf_symbol
+
     for suffix, exchange in SUFFIX_TO_GF_EXCHANGE.items():
         if yf_symbol.endswith(suffix):
             base = yf_symbol[: -len(suffix)]
@@ -42,22 +45,21 @@ def to_google_finance_ticker(yf_symbol: str) -> str:
     return f"{yf_symbol}:NASDAQ"
 
 
-@st.cache_data(ttl=120)
+@st.cache_data(ttl=180)
 def fetch_google_finance_news(gf_ticker: str, query_name: str, limit: int = 8):
     """Fetches news from Google Finance quote page first, with Google News RSS fallback."""
     articles = []
-    gf_url = f"https://www.google.com/finance/quote/{gf_ticker}?hl=en"
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/128.0.0.0 Safari/537.36"
-        )
-    }
+    is_commodity = gf_ticker.endswith("=F")
+    gf_url = (
+        f"https://www.google.com/finance/markets/commodities?hl=en"
+        if is_commodity
+        else f"https://www.google.com/finance/quote/{gf_ticker}?hl=en"
+    )
+    session = get_http_session()
 
-    if BeautifulSoup is not None:
+    if BeautifulSoup is not None and not is_commodity:
         try:
-            resp = requests.get(gf_url, headers=headers, timeout=5)
+            resp = session.get(gf_url, timeout=4)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.text, "html.parser")
                 seen = set()
@@ -84,9 +86,14 @@ def fetch_google_finance_news(gf_ticker: str, query_name: str, limit: int = 8):
 
     if not articles:
         try:
-            encoded_q = urllib.parse.quote(f"{query_name} stock OR market")
+            search_topic = (
+                f"{query_name} commodity price OR market"
+                if is_commodity
+                else f"{query_name} stock OR market"
+            )
+            encoded_q = urllib.parse.quote(search_topic)
             rss_url = f"https://news.google.com/rss/search?q={encoded_q}&hl=en-IN&gl=IN&ceid=IN:en"
-            resp = requests.get(rss_url, headers=headers, timeout=5)
+            resp = session.get(rss_url, timeout=4)
             if resp.status_code == 200:
                 root = ET.fromstring(resp.content)
                 for item in root.findall(".//item")[:limit]:

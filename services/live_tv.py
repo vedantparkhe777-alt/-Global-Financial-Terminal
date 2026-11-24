@@ -7,7 +7,21 @@ import streamlit as st
 from config.markets import MARKETS
 
 
-def fetch_latest_live_video_id(channel_id: str):
+@st.cache_resource
+def get_http_session() -> requests.Session:
+    """Shared HTTP session with connection pooling across reruns."""
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/128.0.0.0 Safari/537.36"
+        )
+    })
+    return session
+
+
+def fetch_latest_live_video_id(channel_id: str) -> str | None:
     """Fetches the exact video ID of the current live stream using YouTube's UULV playlist RSS."""
     if not channel_id or not channel_id.startswith("UC"):
         return None
@@ -16,7 +30,7 @@ def fetch_latest_live_video_id(channel_id: str):
     rss_url = f"https://www.youtube.com/feeds/videos.xml?playlist_id={playlist_id}"
 
     try:
-        response = requests.get(rss_url, timeout=4)
+        response = get_http_session().get(rss_url, timeout=3)
         if response.status_code == 200:
             root = ET.fromstring(response.content)
             atom_ns = "{http://www.w3.org/2005/Atom}"
@@ -32,19 +46,19 @@ def fetch_latest_live_video_id(channel_id: str):
     return None
 
 
-@st.cache_data(ttl=60)
-def get_market_channel_statuses(market_key: str):
-    """Concurrently checks live status for all channels assigned to a market."""
+@st.cache_data(ttl=120)
+def get_market_channel_video_ids(market_key: str) -> dict[str, str | None]:
+    """Concurrently fetches live video IDs (or None if offline) for all channels in a market."""
     channels = MARKETS[market_key]["channels"]
-    results = {}
+    results: dict[str, str | None] = {}
 
-    def check_status(name, cid):
-        return name, bool(fetch_latest_live_video_id(cid))
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-        futures = [executor.submit(check_status, name, cid) for name, cid in channels.items()]
-        for future in concurrent.futures.as_completed(futures):
-            name, is_live = future.result()
-            results[name] = is_live
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_map = {
+            executor.submit(fetch_latest_live_video_id, cid): name
+            for name, cid in channels.items()
+        }
+        for future in concurrent.futures.as_completed(future_map):
+            name = future_map[future]
+            results[name] = future.result()
 
     return results
