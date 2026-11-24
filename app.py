@@ -26,6 +26,7 @@ with top_right:
     new_mode = "Light" if "Light" in chosen_theme else "Dark"
     if new_mode != st.session_state.theme_mode:
         st.session_state.theme_mode = new_mode
+        apply_theme_css(new_mode)
         st.rerun()
 
 if "symbol" in st.query_params:
