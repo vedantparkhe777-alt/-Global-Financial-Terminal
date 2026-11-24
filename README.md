@@ -18,7 +18,7 @@ A high-performance, real-time financial tracking and AI research terminal built 
   - 🇯🇵 **Nikkei Top 50** (`^N225`, Tokyo Stock Exchange)
   - 🇰🇷 **KOSPI Top 50** (`^KS11`, Korea Exchange)
   - 🛢️ **Global Commodities** (`DBC`, Energy, Precious/Industrial Metals & Agriculture Futures)
-- **⭐ In-Page AI Agent Research Popup**: Click any **⭐** cell in the live table to launch an instant in-page modal report powered by **Gemini 3.8 Flash** (with an automatic quantitative fallback engine):
+- **⭐ In-Page AI Agent Research Popup**: Click any **⭐** cell in the live table to launch an instant in-page modal report powered by **Gemini Hydrogen 4** (with an automatic quantitative fallback engine):
   - **Quantitative Technical Engine**: Computes live 20/50/200-DMA trends, 14-day RSI, 14-day ATR volatility bands, and 20-day Support & Resistance levels.
   - **Institutional Synthesis**: Combines technicals, fundamentals, and recent Google Finance headlines into an **Executive Summary**, **Key Pros (Bull Case)**, **Key Cons & Risks (Bear Case)**, and an **Actionable Entry, Stop-Loss & Exit Target Plan**.
 - **🕒 Smart Market & Futures Session Awareness**: Evaluates local exchange timezones, weekday status, split Asian sessions, and 24×5 CME/COMEX/NYMEX futures trading windows—automatically pausing background polling when markets are closed or while reading an AI report.
