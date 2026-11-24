@@ -1,5 +1,5 @@
 
-# 🌐 [Global Financial Terminal: AI Stock & Commodity Analyzer (Ultra Speed Edition)](https://global-financial-terminal.streamlit.app/)
+# 🌐 [Global Financial Terminal: AI Stock & Commodity Analyzer](https://global-financial-terminal.streamlit.app/)
 
 A high-performance, real-time financial tracking and AI research terminal built with **Python**, **Streamlit**, **Google Gemini (`gemini-Hydrogen-4`)**, **yfinance**, **Plotly**, and **Requests**. Designed like an institutional terminal, this app features batched multi-threaded bulk market data fetching, 24×5 futures & exchange session awareness, an interactive in-page AI Analyst popup, fundamental deep dives, news feeds, and embedded live broadcast hubs across major global markets.
 
