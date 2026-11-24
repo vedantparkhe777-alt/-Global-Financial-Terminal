@@ -1,4 +1,5 @@
 import time
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -21,14 +22,22 @@ def render_market_status_banner(market_key: str) -> bool:
     return is_open
 
 
-def render_intraday_chart(ticker_symbol: str, curr_sym: str, chart_type: str, is_open: bool):
+def render_intraday_chart(
+    ticker_symbol: str,
+    curr_sym: str,
+    chart_type: str,
+    is_open: bool,
+    history: pd.DataFrame | None = None,
+):
     st.subheader("Intraday Chart")
     if is_open:
         st.caption(f"⚡ Live Feed Updated: {time.strftime('%H:%M:%S')}")
     else:
         st.caption("⏸️ Market is currently closed — live intraday feed unavailable. Showing last session if available.")
 
-    history = get_intraday_history(ticker_symbol)
+    if history is None:
+        history = get_intraday_history(ticker_symbol)
+
     if not history.empty:
         fig = go.Figure()
         is_light = st.session_state.theme_mode == "Light"
@@ -69,9 +78,18 @@ def render_intraday_chart(ticker_symbol: str, curr_sym: str, chart_type: str, is
         st.warning("Live intraday chart data is unavailable right now (market closed or no session ticks yet).")
 
 
-def render_google_finance_news(gf_ticker: str, query_name: str, heading: str):
+def render_google_finance_news(
+    gf_ticker: str,
+    query_name: str,
+    heading: str,
+    prefetched_news: tuple[str, list] | None = None,
+):
     head_col, link_col = st.columns([3.5, 1.2])
-    gf_url, articles = fetch_google_finance_news(gf_ticker, query_name)
+    gf_url, articles = (
+        prefetched_news
+        if prefetched_news is not None
+        else fetch_google_finance_news(gf_ticker, query_name)
+    )
 
     with head_col:
         st.subheader(heading)
@@ -83,7 +101,11 @@ def render_google_finance_news(gf_ticker: str, query_name: str, heading: str):
         return
 
     for art in articles:
-        title_html = f'<a href="{art["link"]}" target="_blank">{art["title"]}</a>' if art["link"] else f'<strong>{art["title"]}</strong>'
+        title_html = (
+            f'<a href="{art["link"]}" target="_blank">{art["title"]}</a>'
+            if art["link"]
+            else f'<strong>{art["title"]}</strong>'
+        )
         meta_parts = [p for p in [art["publisher"], art["pub_time"]] if p]
         meta_str = " • ".join(meta_parts)
         st.markdown(

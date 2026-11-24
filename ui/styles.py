@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 LIGHT_CSS = """
@@ -85,6 +86,21 @@ LIGHT_CSS = """
         border-radius: 10px;
         overflow: hidden;
         background-color: #ffffff !important;
+    }
+    div[data-testid="stDialog"] > div > div,
+    div[role="dialog"] {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    div[role="dialog"] h1,
+    div[role="dialog"] h2,
+    div[role="dialog"] h3,
+    div[role="dialog"] p,
+    div[role="dialog"] li,
+    div[role="dialog"] span,
+    div[role="dialog"] strong {
+        color: #0f172a !important;
     }
     .status-open {
         background: #dcfce7;
@@ -210,6 +226,21 @@ DARK_CSS = """
         border-radius: 8px;
         overflow: hidden;
     }
+    div[data-testid="stDialog"] > div > div,
+    div[role="dialog"] {
+        background-color: #161b22 !important;
+        color: #e0e6ed !important;
+        border: 1px solid #30363d !important;
+    }
+    div[role="dialog"] h1,
+    div[role="dialog"] h2,
+    div[role="dialog"] h3,
+    div[role="dialog"] p,
+    div[role="dialog"] li,
+    div[role="dialog"] span,
+    div[role="dialog"] strong {
+        color: #e0e6ed !important;
+    }
     .status-open {
         background: #052e16;
         color: #86efac !important;
@@ -250,7 +281,27 @@ DARK_CSS = """
 """
 
 
+def _sync_streamlit_theme_config(theme_mode: str):
+    """Keeps Streamlit's canvas dataframe and dialog portal synced with the toggle."""
+    try:
+        if theme_mode == "Light":
+            st._config.set_option("theme.base", "light")
+            st._config.set_option("theme.primaryColor", "#2563eb")
+            st._config.set_option("theme.backgroundColor", "#f8fafc")
+            st._config.set_option("theme.secondaryBackgroundColor", "#ffffff")
+            st._config.set_option("theme.textColor", "#0f172a")
+        else:
+            st._config.set_option("theme.base", "dark")
+            st._config.set_option("theme.primaryColor", "#38bdf8")
+            st._config.set_option("theme.backgroundColor", "#0e1117")
+            st._config.set_option("theme.secondaryBackgroundColor", "#161b22")
+            st._config.set_option("theme.textColor", "#e0e6ed")
+    except Exception:
+        pass
+
+
 def apply_theme_css(theme_mode: str):
+    _sync_streamlit_theme_config(theme_mode)
     st.markdown(LIGHT_CSS if theme_mode == "Light" else DARK_CSS, unsafe_allow_html=True)
 
 
@@ -267,3 +318,17 @@ def color_cells(val):
             elif val < 0:
                 return "color: #FF5252; font-weight: 600;"
     return ""
+
+
+def style_market_dataframe(df: pd.DataFrame, theme_mode: str):
+    """Applies Light/Dark cell surfaces and green/red % Change colors to the dataframe canvas."""
+    if theme_mode == "Light":
+        return df.style.set_properties(**{
+            "background-color": "#ffffff",
+            "color": "#0f172a",
+        }).map(color_cells, subset=["% Change"])
+
+    return df.style.set_properties(**{
+        "background-color": "#161b22",
+        "color": "#e0e6ed",
+    }).map(color_cells, subset=["% Change"])
