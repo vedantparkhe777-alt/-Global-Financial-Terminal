@@ -83,5 +83,27 @@ COMPANY_NAMES = {
     "010950.KS": "S-Oil", "000120.KS": "CJ Logistics", "030200.KS": "KT Corporation", "017670.KS": "SK Telecom", "005935.KS": "Samsung Electronics (Pref)",
     "003490.KS": "Korean Air", "000720.KS": "Hyundai Engineering & Construction", "036570.KS": "NCsoft", "011170.KS": "Lotte Chemical", "004020.KS": "Hyundai Steel",
     "267250.KS": "Hyundai Heavy Industries", "024110.KS": "기업은행 (IBK)", "000100.KS": "Yuhan", "005830.KS": "DB Insurance", "000060.KS": "Meritz Financial Group",
-    "006800.KS": "Mirae Asset Securities", "021240.KS": "Coway", "005385.KS": "Hyundai Motor (Pref)", "001040.KS": "CJ Corporation", "033780.KS": "KT&G"
+    "006800.KS": "Mirae Asset Securities", "021240.KS": "Coway", "005385.KS": "Hyundai Motor (Pref)", "001040.KS": "CJ Corporation", "033780.KS": "KT&G",
+
+    # Global Commodities Futures
+    "GC=F": "Gold Futures (COMEX)",
+    "SI=F": "Silver Futures (COMEX)",
+    "PL=F": "Platinum Futures",
+    "PA=F": "Palladium Futures",
+    "HG=F": "Copper Futures",
+    "CL=F": "WTI Crude Oil",
+    "BZ=F": "Brent Crude Oil",
+    "NG=F": "Natural Gas",
+    "RB=F": "RBOB Gasoline",
+    "HO=F": "Heating Oil",
+    "ZC=F": "Corn Futures",
+    "ZW=F": "Wheat Futures",
+    "ZS=F": "Soybean Futures",
+    "KC=F": "Coffee Futures",
+    "SB=F": "Sugar #11 Futures",
+    "CC=F": "Cocoa Futures",
+    "CT=F": "Cotton Futures",
+    "LE=F": "Live Cattle",
+    "HE=F": "Lean Hogs",
+    "LBR=F": "Lumber Futures",
 }

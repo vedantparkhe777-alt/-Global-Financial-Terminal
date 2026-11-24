@@ -8,7 +8,7 @@ NIFTY_50_SYMBOLS = [
     "LT.NS", "M&M.NS", "MARUTI.NS", "NESTLEIND.NS", "NTPC.NS",
     "ONGC.NS", "POWERGRID.NS", "RELIANCE.NS", "SBILIFE.NS", "SBIN.NS",
     "SHRIRAMFIN.NS", "SUNPHARMA.NS", "TATACONSUM.NS", "TMPV.NS", "TMCV.NS", "TATASTEEL.NS",
-    "TCS.NS", "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS", "WIPRO.NS"
+    "TCS.NS", "TECHM.NS", "TITAN.NS", "ULTRACEMCO.NS", "WIPRO.NS",
 ]
 
 NASDAQ_50_SYMBOLS = [
@@ -16,7 +16,7 @@ NASDAQ_50_SYMBOLS = [
     "ASML", "TMUS", "CSCO", "PEP", "ADBE", "LIN", "AMD", "NFLX", "AZN", "QCOM",
     "TXN", "INTC", "AMGN", "HON", "AMAT", "CMCSA", "BKNG", "SBUX", "VRTX", "ADP",
     "GILD", "MDLZ", "REGN", "ADI", "PDD", "ISRG", "LRCX", "MU", "INTU", "MELI",
-    "CSX", "PANW", "SNPS", "CDNS", "KLAC", "ORLY", "MAR", "PYPL", "CRWD", "CTAS"
+    "CSX", "PANW", "SNPS", "CDNS", "KLAC", "ORLY", "MAR", "PYPL", "CRWD", "CTAS",
 ]
 
 EURO_STOXX_50_SYMBOLS = [
@@ -25,7 +25,7 @@ EURO_STOXX_50_SYMBOLS = [
     "BBVA.MC", "ITX.MC", "ENEL.MI", "INGA.AS", "ISP.MI", "BAS.DE", "MBG.DE", "BAYN.DE",
     "DTE.DE", "MUV2.DE", "DB1.DE", "CS.PA", "BN.PA", "ABI.BR", "RACE.MI", "ENI.MI",
     "IFX.DE", "DHL.DE", "ADS.DE", "ADYEN.AS", "BMW.DE", "CRH.L", "AENA.MC", "HEIA.AS",
-    "ENGGI.PA", "AD.AS", "SASY.PA", "NOKIA.HE", "GLE.PA", "VOW3.DE", "REP.MC", "PRX.AS"
+    "ENGGI.PA", "AD.AS", "SASY.PA", "NOKIA.HE", "GLE.PA", "VOW3.DE", "REP.MC", "PRX.AS",
 ]
 
 CHINA_TOP_50_SYMBOLS = [
@@ -38,7 +38,7 @@ CHINA_TOP_50_SYMBOLS = [
     "000568.SZ", "002352.SZ", "300274.SZ", "002415.SZ", "000001.SZ",
     "9988.HK", "0700.HK", "3690.HK", "1810.HK", "9618.HK",
     "2318.HK", "0939.HK", "1398.HK", "3988.HK", "0883.HK",
-    "1211.HK", "2269.HK", "2020.HK", "1024.HK", "9888.HK"
+    "1211.HK", "2269.HK", "2020.HK", "1024.HK", "9888.HK",
 ]
 
 JAPAN_TOP_50_SYMBOLS = [
@@ -51,7 +51,7 @@ JAPAN_TOP_50_SYMBOLS = [
     "6981.T", "7751.T", "8031.T", "8801.T", "8802.T",
     "9020.T", "9022.T", "9101.T", "9104.T", "9107.T",
     "6273.T", "6301.T", "7270.T", "7309.T", "6971.T",
-    "4901.T", "5108.T", "2503.T", "2802.T", "3382.T"
+    "4901.T", "5108.T", "2503.T", "2802.T", "3382.T",
 ]
 
 KOREA_TOP_50_SYMBOLS = [
@@ -64,7 +64,14 @@ KOREA_TOP_50_SYMBOLS = [
     "010950.KS", "000120.KS", "030200.KS", "017670.KS", "005935.KS",
     "003490.KS", "000720.KS", "036570.KS", "011170.KS", "004020.KS",
     "267250.KS", "024110.KS", "000100.KS", "005830.KS", "000060.KS",
-    "006800.KS", "021240.KS", "005385.KS", "001040.KS", "033780.KS"
+    "006800.KS", "021240.KS", "005385.KS", "001040.KS", "033780.KS",
+]
+
+COMMODITIES_SYMBOLS = [
+    "GC=F", "SI=F", "CL=F", "BZ=F", "NG=F",
+    "HG=F", "PL=F", "PA=F", "RB=F", "HO=F",
+    "ZC=F", "ZW=F", "ZS=F", "KC=F", "SB=F",
+    "CC=F", "CT=F", "LE=F", "HE=F", "LBR=F",
 ]
 
 MARKETS = {
@@ -198,6 +205,27 @@ MARKETS = {
             "KBS WORLD TV (South Korea)": "UC5BMQOsAB8hKUyHu9KI6yig",
             "CNA (Singapore)": "UC83jt4dlz1Gjl58fzQrrKZg",
             "Bloomberg Television": "UCIALMKvObZNtJ6AmdCLP7Lg",
+        },
+    },
+    "Commodities": {
+        "label": "🛢️ Commodities",
+        "title": "🛢️ Global Commodities (Energy, Metals & Agri)",
+        "desc": "Major CME/COMEX/NYMEX commodity futures sorted by trading volume.",
+        "symbols": COMMODITIES_SYMBOLS,
+        "currency": "$",
+        "index_ticker": "DBC",
+        "index_name": "DB Commodity Index (DBC)",
+        "gf_index_ticker": "DBC:NYSEARCA",
+        "tz": "America/New_York",
+        "utc_offset": -5.0,
+        "is_24x5": True,
+        "sessions": [((0, 0), (16, 59)), ((18, 0), (23, 59))],
+        "hours_label": "Sun 18:00 – Fri 17:00 ET (Daily break 17:00–18:00)",
+        "channels": {
+            "Bloomberg Television": "UCIALMKvObZNtJ6AmdCLP7Lg",
+            "CNBC": "UCvJJ_dzjViJCoLf5uKUTcgA",
+            "Reuters": "UChqUTb7kYRX8-EiaN3XFrSQ",
+            "Yahoo Finance": "UCeioA5CXYLh63-B_eI91eFQ",
         },
     },
 }
