@@ -115,6 +115,3 @@ streamlit run app.py
 ## ⚠️ Disclaimer
 
 Market prices, percentage changes, sentiment tags, news items, live broadcast feeds, and AI-generated technical/fundamental summaries are provided for educational and informational purposes only and do not constitute financial or investment advice.
-
-```
-
