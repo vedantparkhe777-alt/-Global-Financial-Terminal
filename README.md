@@ -35,7 +35,7 @@ A high-performance, real-time financial tracking and AI research terminal built 
 ## 🛠️ Tech Stack
 
 - **Frontend & Framework**: [Streamlit](https://streamlit.io/) (`@st.fragment`, `@st.dialog`, single-cell selection)
-- **AI & Quantitative Analysis**: [Google Gen AI SDK](https://ai.google.dev/) (`gemini-3.8-flash` Interactions API) & [Pandas](https://pandas.pydata.org/)
+- **AI & Quantitative Analysis**: [Google Gen AI SDK](https://ai.google.dev/) (`gemini-4` Interactions API) & [Pandas](https://pandas.pydata.org/)
 - **Market Data & HTTP Pooling**: [yfinance](https://github.com/ranaroussi/yfinance) & [Requests](https://requests.readthedocs.io/) (`requests.Session`)
 - **Interactive Visualization**: [Plotly](https://plotly.com/python/)
 - **HTML / RSS Parsing**: [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/) & `xml.etree.ElementTree`
