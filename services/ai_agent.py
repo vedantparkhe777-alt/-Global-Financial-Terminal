@@ -9,6 +9,8 @@ from config.companies import COMPANY_NAMES
 from services.market_data import currency_symbol_from_code, get_ticker_info_cached
 from services.news import fetch_google_finance_news, to_google_finance_ticker
 
+MODEL_ID = "gemini-4-hydrogen"
+
 
 @st.cache_data(ttl=300)
 def get_technical_snapshot(ticker_symbol: str) -> dict:
@@ -64,10 +66,13 @@ def get_technical_snapshot(ticker_symbol: str) -> dict:
 def _get_gemini_api_key() -> str | None:
     try:
         if "GEMINI_API_KEY" in st.secrets:
-            return st.secrets["GEMINI_API_KEY"]
+            key = str(st.secrets["GEMINI_API_KEY"]).strip()
+            if key:
+                return key
     except Exception:
         pass
-    return os.getenv("GEMINI_API_KEY")
+    env_key = os.getenv("GEMINI_API_KEY", "").strip()
+    return env_key or None
 
 
 def _fallback_report(stock_name: str, ticker: str, curr_sym: str, tech: dict, info: dict) -> str:
@@ -102,23 +107,41 @@ def _fallback_report(stock_name: str, ticker: str, curr_sym: str, tech: dict, in
 
 @st.cache_data(ttl=600, show_spinner=False)
 def _query_gemini_cached(ticker_symbol: str, prompt: str, api_key: str) -> str:
-    """Cached only on success so transient errors are never cached."""
+    """Queries Gemini 4 Hydrogen and caches only successful responses."""
     from google import genai
+    from google.genai import types
 
     client = genai.Client(api_key=api_key)
-    if hasattr(client, "interactions"):
-        interaction = client.interactions.create(
-            model="gemini-3.8-flash",
-            input=prompt,
-            generation_config={"thinking_level": "low"},
-        )
-        return interaction.output_text
 
+    # Primary: Interactions API (recommended for Gemini 4 Hydrogen)
+    if hasattr(client, "interactions"):
+        try:
+            interaction = client.interactions.create(
+                model=MODEL_ID,
+                input=prompt,
+                generation_config={"thinking_level": "LOW"},
+            )
+            if getattr(interaction, "output_text", None):
+                return interaction.output_text
+            outputs = getattr(interaction, "outputs", None) or []
+            text_parts = [getattr(o, "text", "") for o in outputs if getattr(o, "text", None)]
+            if text_parts:
+                return "\n".join(text_parts)
+        except Exception:
+            pass
+
+    # Secondary: Standard GenerateContent API
     response = client.models.generate_content(
-        model="gemini-3.8-flash",
+        model=MODEL_ID,
         contents=prompt,
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_level="LOW"),
+        ),
     )
-    return response.text
+    if getattr(response, "text", None):
+        return response.text
+
+    raise RuntimeError("Gemini 4 Hydrogen returned an empty response.")
 
 
 def generate_ai_stock_report(ticker_symbol: str) -> dict:
@@ -144,7 +167,8 @@ def generate_ai_stock_report(ticker_symbol: str) -> dict:
             "curr_sym": curr_sym,
             "tech": tech,
             "info": info,
-            "markdown": _fallback_report(stock_name, ticker_symbol, curr_sym, tech, info),
+            "markdown": _fallback_report(stock_name, ticker_symbol, curr_sym, tech, info)
+            + "\n\n*(Add `GEMINI_API_KEY = \"AIza...\"` to `.streamlit/secrets.toml` to enable Gemini 4 Hydrogen analysis.)*",
             "powered_by": "Quantitative Technical Engine (No Gemini API Key)",
         }
 
@@ -199,9 +223,12 @@ Format your response cleanly in Markdown with these exact sections:
 
     try:
         md_text = _query_gemini_cached(ticker_symbol, prompt, api_key)
-        powered_by = "Gemini 3.8 Flash AI Agent"
+        powered_by = "Gemini 4 Hydrogen AI Agent"
     except Exception as e:
-        md_text = _fallback_report(stock_name, ticker_symbol, curr_sym, tech, info) + f"\n\n> ⚠️ Gemini fallback triggered: `{e}`"
+        md_text = (
+            _fallback_report(stock_name, ticker_symbol, curr_sym, tech, info)
+            + f"\n\n> ⚠️ Gemini fallback triggered: `{e}`"
+        )
         powered_by = "Fallback Engine"
 
     return {
